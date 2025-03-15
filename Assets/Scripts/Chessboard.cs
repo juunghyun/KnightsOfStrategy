@@ -1,4 +1,7 @@
+using System;
 using System.IO.Compression;
+using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,6 +23,7 @@ public class Chessboard : MonoBehaviour
     
     //LOGIC
     private ChessPiece[,] chessPieces;
+    private ChessPiece currentlyDragging;
     private const int TILE_COUNT_X = 8;
     private const int TILE_COUNT_Y = 8;
     private GameObject[,] tiles;
@@ -71,6 +75,34 @@ public class Chessboard : MonoBehaviour
                 // 새로 hover한 타일에 HoverTiles 재질 적용
                 tiles[hitPosition.x, hitPosition.y].GetComponent<MeshRenderer>().material = hoverTileMaterial;
             }
+        
+            // 좌클릭
+            if(Input.GetMouseButtonDown(0))
+            {
+                if(chessPieces[hitPosition.x, hitPosition.y]!= null)
+                {
+                    // 내 턴이야?(흑 턴인지 백 턴인지지)
+                    if(true)
+                    {
+                        currentlyDragging = chessPieces[hitPosition.x, hitPosition.y];
+                    }
+                }
+            }
+
+            //좌클릭 해제
+            if(currentlyDragging != null && Input.GetMouseButtonUp(0))
+            {
+                Vector2Int previousPosition = new Vector2Int(currentlyDragging.currentX, currentlyDragging.currentY);
+
+                bool validMove = MoveTo(currentlyDragging, hitPosition.x, hitPosition.y);
+
+                //유효하지 않은 위치라면, 원래 있던 위치로 되돌리기
+                if(!validMove)
+                {
+                    currentlyDragging.SetPosition(GetTileCenter(previousPosition.x, previousPosition.y));
+                    currentlyDragging = null;
+                }
+            }
         }
         else
         {
@@ -83,6 +115,7 @@ public class Chessboard : MonoBehaviour
             }
         }
     }
+
 
     // 보드 생성
     
@@ -192,10 +225,40 @@ public class Chessboard : MonoBehaviour
     {
         chessPieces[x, y].currentX = x;
         chessPieces[x, y].currentY = y;
-        chessPieces[x, y].transform.position = new Vector3(x * tileSize, yOffset, y * tileSize);
+        chessPieces[x, y].SetPosition(GetTileCenter(x, y), force);
+    }
+    private Vector3 GetTileCenter(int x, int y)
+    {
+        return new Vector3(x * tileSize, yOffset, y * tileSize) - bounds + new Vector3(tileSize/2, 0, tileSize/2);
     }
     
     // Operations
+    private bool MoveTo(ChessPiece cp, int x, int y)
+    {
+        Vector2Int previousPosition = new Vector2Int(cp.currentX, cp.currentY);
+
+        //목표 지점에 다른 기물이 있는 경우
+        if(chessPieces[x,y]!= null)
+        {
+            ChessPiece ocp = chessPieces[x, y];
+            if(cp.team == ocp.team) //같은팀 기물임?
+            {
+                return false;
+            }
+            else //다른팀 기물 -> 해당 기물 처치
+            {
+                //TODO
+                return true;
+            }
+        }
+
+        chessPieces[x,y] = cp;
+        chessPieces[previousPosition.x, previousPosition.y] = null;
+
+        PositionSinglePiece(x,y);
+
+        return true;
+    }
     private Vector2Int LookupTileIndex(GameObject hitInfo)
     {
         for (int x = 0; x < TILE_COUNT_X; x++)
@@ -208,4 +271,6 @@ public class Chessboard : MonoBehaviour
 
         return -Vector2Int.one; // 못찾았다면 -1 -1 (INVALID)
     }
+
+
 }
