@@ -205,13 +205,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.59423125, y: 0.00047588343, z: -0.00035772935, w: -0.804294}
-  m_LocalPosition: {x: 3.76489, y: 9.096075, z: 0.49705648}
+  m_LocalRotation: {x: 0.5913904, y: -0, z: -0, w: 0.80638534}
+  m_LocalPosition: {x: 0, y: 9, z: -3.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 68.475, y: -80, z: 0}
+  m_LocalEulerAnglesHint: {x: 72.511, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,7 +387,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
       propertyPath: m_Name
-      value: Chessboard
+      value: ChessBoard
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
       propertyPath: m_LocalScale.x
@@ -403,15 +403,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0
+      value: -3.5
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.5
+      value: -3.5
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
       propertyPath: m_LocalRotation.w
@@ -517,9 +517,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileMaterial: {fileID: 2100000, guid: 3e0acf771daf64b40b16e1435bfef0a4, type: 2}
   tileSize: 1
-  yOffset: 0.1
-  boardCenter: {x: -3.5, y: 0, z: -4}
+  yOffset: 0.05
+  boardCenter: {x: 0, y: 0, z: 0}
   hoverTileMaterial: {fileID: 2100000, guid: 041c81966e539524a84e40b79f6dd22f, type: 2}
+  prefabs:
+  - {fileID: 1867195236767680, guid: b1d95c04dd54e434aa65855a0f77d30f, type: 3}
+  - {fileID: 1211746330687442, guid: a72c2cd1520039b4084a4a33dfeccf7e, type: 3}
+  - {fileID: 1179637952412708, guid: a007978aa14da3945b0f6655f65cc278, type: 3}
+  - {fileID: 1672242659374470, guid: f005021ceced8b240983e71a3d481180, type: 3}
+  - {fileID: 1471985601831630, guid: 664a4dc6e997f5f47a9233db911328ac, type: 3}
+  - {fileID: 1810274083847610, guid: 309659d4eb727d74d91c4875a85edc00, type: 3}
+  teamMaterials:
+  - {fileID: 2100000, guid: 00912c1e55787984d8a57cef15d87a8b, type: 2}
+  - {fileID: 2100000, guid: 519bb7ad9c0b01145b66756f3c261e30, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
