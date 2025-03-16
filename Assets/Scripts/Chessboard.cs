@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO.Compression;
 using Unity.Collections;
 using Unity.VisualScripting;
@@ -12,9 +13,12 @@ public class Chessboard : MonoBehaviour
     [Header("Art stuff")]
     [SerializeField] private Material tileMaterial;  // 기본 타일 재질
     [SerializeField] private float tileSize = 1.0f;
-    [SerializeField] private float yOffset = 0.2f;
+    [SerializeField] private float yOffset = 0.05f;
+    [SerializeField] private float deathSize = 0.6f;
+    [SerializeField] private float deathSpacing = 0.53f;
     [SerializeField] private Vector3 boardCenter = Vector3.zero;
     [SerializeField] private Material hoverTileMaterial; // Hover 상태일 때 사용할 재질
+    [SerializeField] private float dragOffset = 1.0f;
 
     [Header("Prefabs && Materials")]
     [SerializeField] private GameObject[] prefabs;
@@ -24,6 +28,8 @@ public class Chessboard : MonoBehaviour
     //LOGIC
     private ChessPiece[,] chessPieces;
     private ChessPiece currentlyDragging;
+    private List<ChessPiece> deadWhites = new List<ChessPiece>();
+    private List<ChessPiece> deadBlacks = new List<ChessPiece>();
     private const int TILE_COUNT_X = 8;
     private const int TILE_COUNT_Y = 8;
     private GameObject[,] tiles;
@@ -102,6 +108,10 @@ public class Chessboard : MonoBehaviour
                     currentlyDragging.SetPosition(GetTileCenter(previousPosition.x, previousPosition.y));
                     currentlyDragging = null;
                 }
+                else
+                {
+                    currentlyDragging = null;
+                }
             }
         }
         else
@@ -112,6 +122,23 @@ public class Chessboard : MonoBehaviour
                 tiles[currentHover.x, currentHover.y].GetComponent<MeshRenderer>().material = tileMaterial;
                 tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
                 currentHover = -Vector2Int.one;
+            }
+
+            if(currentlyDragging && Input.GetMouseButtonUp(0))
+            {
+                currentlyDragging.SetPosition(GetTileCenter(currentlyDragging.currentX, currentlyDragging.currentY));
+                currentlyDragging = null;
+            }
+        }
+
+        // 기물을 드래그 하는 도중이라면 (기물을 드래그하는동안 띄워진 상태로 움직이는것 구현현)
+        if(currentlyDragging)
+        {
+            Plane horizontalPlane = new Plane(Vector3.up, Vector3.up * yOffset); //plane : 3d공간에서 무한한 평면면(up : 0,1,0)
+            float distance = 0.0f;
+            if(horizontalPlane.Raycast(ray, out distance))
+            {
+                currentlyDragging.SetPosition(ray.GetPoint(distance) + Vector3.up * dragOffset);
             }
         }
     }
@@ -245,10 +272,24 @@ public class Chessboard : MonoBehaviour
             {
                 return false;
             }
-            else //다른팀 기물 -> 해당 기물 처치
+            
+            if(ocp.team == 0)
             {
-                //TODO
-                return true;
+                deadWhites.Add(ocp);
+                ocp.SetScale(Vector3.one * deathSize);
+                ocp.SetPosition(new Vector3(8 * tileSize, yOffset, -1 * tileSize)
+                    - bounds
+                    + new Vector3(tileSize/2, 0, tileSize/2) //타일 중간에 위치하게끔 함함
+                    + (Vector3.forward * deathSpacing) * deadWhites.Count); //잡힌 기물 숫자에 따라 조금씩 위치 조정
+            }
+            else
+            {
+                deadBlacks.Add(ocp);
+                ocp.SetScale(Vector3.one * deathSize);
+                ocp.SetPosition(new Vector3(-1 * tileSize, yOffset, 8 * tileSize)
+                    - bounds
+                    + new Vector3(tileSize/2, 0, tileSize/2) //타일 중간에 위치하게끔 함함
+                    + (Vector3.back * deathSpacing) * deadBlacks.Count); //잡힌 기물 숫자에 따라 조금씩 위치 조정
             }
         }
 

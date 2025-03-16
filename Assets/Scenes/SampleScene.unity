@@ -518,6 +518,8 @@ MonoBehaviour:
   tileMaterial: {fileID: 2100000, guid: 3e0acf771daf64b40b16e1435bfef0a4, type: 2}
   tileSize: 1
   yOffset: 0.05
+  deathSize: 0.6
+  deathSpacing: 0.53
   boardCenter: {x: 0, y: 0, z: 0}
   hoverTileMaterial: {fileID: 2100000, guid: 041c81966e539524a84e40b79f6dd22f, type: 2}
   prefabs:
