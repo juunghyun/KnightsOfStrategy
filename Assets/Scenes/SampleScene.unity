@@ -389,6 +389,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ChessBoard
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -522,6 +526,7 @@ MonoBehaviour:
   deathSpacing: 0.53
   boardCenter: {x: 0, y: 0, z: 0}
   hoverTileMaterial: {fileID: 2100000, guid: 041c81966e539524a84e40b79f6dd22f, type: 2}
+  dragOffset: 1
   prefabs:
   - {fileID: 1867195236767680, guid: b1d95c04dd54e434aa65855a0f77d30f, type: 3}
   - {fileID: 1211746330687442, guid: a72c2cd1520039b4084a4a33dfeccf7e, type: 3}

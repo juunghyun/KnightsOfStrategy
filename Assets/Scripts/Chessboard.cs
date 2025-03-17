@@ -28,6 +28,7 @@ public class Chessboard : MonoBehaviour
     //LOGIC
     private ChessPiece[,] chessPieces;
     private ChessPiece currentlyDragging;
+    private List<Vector2Int> availableMoves = new List<Vector2Int>();
     private List<ChessPiece> deadWhites = new List<ChessPiece>();
     private List<ChessPiece> deadBlacks = new List<ChessPiece>();
     private const int TILE_COUNT_X = 8;
@@ -55,7 +56,7 @@ public class Chessboard : MonoBehaviour
         RaycastHit info; // Ray가 충돌한 오브젝트의 정보를 담는 구조체
         Ray ray = currentCamera.ScreenPointToRay(Input.mousePosition); // 마우스 클릭한 화면 좌표에서 카메라 기준으로 ray 생성(Camera -> Mouse)
         
-        if (Physics.Raycast(ray, out info, 100, LayerMask.GetMask("Tile", "Hover"))) // ray가 Tile레이어에 속한 오브젝트가 있다면 info에 담고 true반환
+        if (Physics.Raycast(ray, out info, 100, LayerMask.GetMask("Tile", "Hover", "Highlight"))) // ray가 레이어에 속한 오브젝트가 있다면 info에 담고 true반환
         {
             // Get the indexes of the tile I've hit
             Vector2Int hitPosition = LookupTileIndex(info.transform.gameObject);
@@ -65,21 +66,15 @@ public class Chessboard : MonoBehaviour
             {
                 currentHover = hitPosition;
                 tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
-                // 타일에 HoverTiles 재질 적용
-                tiles[hitPosition.x, hitPosition.y].GetComponent<MeshRenderer>().material = hoverTileMaterial;
             }
 
-            // If we were already hovering a tile, change the previous one
+            // 다른 타일에 호버가 적용된 상태 -> 이전 타일 원래대로 복귀. (availableMoves 타일 ? higlight : tile 로로)
             if (currentHover != hitPosition)
             {
                 // 이전 타일 원래 색상으로 복원
-                tiles[currentHover.x, currentHover.y].GetComponent<MeshRenderer>().material = tileMaterial;
-                tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
-
+                tiles[currentHover.x, currentHover.y].layer = (ContainsValidMove(ref availableMoves, currentHover)) ? LayerMask.NameToLayer("Highlight") : LayerMask.NameToLayer("Tile");
                 currentHover = hitPosition;
                 tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
-                // 새로 hover한 타일에 HoverTiles 재질 적용
-                tiles[hitPosition.x, hitPosition.y].GetComponent<MeshRenderer>().material = hoverTileMaterial;
             }
         
             // 좌클릭
@@ -88,9 +83,13 @@ public class Chessboard : MonoBehaviour
                 if(chessPieces[hitPosition.x, hitPosition.y]!= null)
                 {
                     // 내 턴이야?(흑 턴인지 백 턴인지지)
-                    if(true)
+                    if(true) //TODO
                     {
                         currentlyDragging = chessPieces[hitPosition.x, hitPosition.y];
+
+                        //기물이 이동할 수 있는 위치 하이라이트.
+                        availableMoves = currentlyDragging.GetAvailableMoves(ref chessPieces, TILE_COUNT_X, TILE_COUNT_Y);
+                        HighlightTiles();
                     }
                 }
             }
@@ -106,12 +105,10 @@ public class Chessboard : MonoBehaviour
                 if(!validMove)
                 {
                     currentlyDragging.SetPosition(GetTileCenter(previousPosition.x, previousPosition.y));
-                    currentlyDragging = null;
                 }
-                else
-                {
-                    currentlyDragging = null;
-                }
+                currentlyDragging = null;
+                RemoveHighlightTiles(); //좌클릭 해제시 하이라이트 해제
+
             }
         }
         else
@@ -119,8 +116,7 @@ public class Chessboard : MonoBehaviour
             // 마우스가 다른 곳으로 벗어났다면, hover 상태 해제
             if (currentHover != -Vector2Int.one)
             {
-                tiles[currentHover.x, currentHover.y].GetComponent<MeshRenderer>().material = tileMaterial;
-                tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
+                tiles[currentHover.x, currentHover.y].layer = (ContainsValidMove(ref availableMoves, currentHover)) ? LayerMask.NameToLayer("Highlight") : LayerMask.NameToLayer("Tile");
                 currentHover = -Vector2Int.one;
             }
 
@@ -128,6 +124,7 @@ public class Chessboard : MonoBehaviour
             {
                 currentlyDragging.SetPosition(GetTileCenter(currentlyDragging.currentX, currentlyDragging.currentY));
                 currentlyDragging = null;
+                RemoveHighlightTiles();
             }
         }
 
@@ -258,10 +255,40 @@ public class Chessboard : MonoBehaviour
     {
         return new Vector3(x * tileSize, yOffset, y * tileSize) - bounds + new Vector3(tileSize/2, 0, tileSize/2);
     }
+
+    //타일 하이라이트
+    private void HighlightTiles()
+    {
+        for (int i = 0; i < availableMoves.Count; i++)
+        {
+            tiles[availableMoves[i].x, availableMoves[i].y].layer = LayerMask.NameToLayer("Highlight");
+        }
+    }
+    private void RemoveHighlightTiles()
+    {
+        for (int i = 0; i < availableMoves.Count; i++)
+        {
+            tiles[availableMoves[i].x, availableMoves[i].y].layer = LayerMask.NameToLayer("Tile");
+        }
+
+        availableMoves.Clear();
+    }
     
     // Operations
+    private bool ContainsValidMove(ref List<Vector2Int> moves, Vector2 pos) //갈 수 있는 위치와, 갈 위치를 정했을때 동일하면 true
+    {
+        for (int i = 0; i < moves.Count; i++)
+        {
+            if(moves[i].x == pos.x && moves[i].y == pos.y) return true;
+        }
+
+        return false;
+    }
     private bool MoveTo(ChessPiece cp, int x, int y)
     {
+
+        if(!ContainsValidMove(ref availableMoves, new Vector2(x,y))) return false; // 갈 수 있는 위치 : availableMoves, 갈 위치 동일하지 않을 시 false
+
         Vector2Int previousPosition = new Vector2Int(cp.currentX, cp.currentY);
 
         //목표 지점에 다른 기물이 있는 경우
