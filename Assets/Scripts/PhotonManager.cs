@@ -74,7 +74,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (int.TryParse(roomCode, out int roomNumber) && roomNumber >= 0 && roomNumber <= 9999)
         {
             PhotonNetwork.JoinRoom(roomCode); // ✅ 방 참가 시도
-            yield return new WaitUntil(() => PhotonNetwork.InRoom || !PhotonNetwork.IsConnected);
+
+            float timeoutDuration = 10f;
+            float elapsedTime = 0f;
+
+            while (!PhotonNetwork.InRoom && PhotonNetwork.IsConnected && elapsedTime < timeoutDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
 
             if (PhotonNetwork.InRoom)
             {
@@ -88,8 +96,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 Debug.LogError("방 입장 실패");
                 joinCodeInput.text = "";
                 StartCoroutine(FlashInputField(joinCodeInput)); // ✅ 수정: 조인 입력 필드에 효과
-                yield return new WaitForSeconds(0.1f);
-                EnableUI(joinCodeInput);
             }
         }
         else
