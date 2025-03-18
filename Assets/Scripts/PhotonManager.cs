@@ -5,6 +5,10 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
+using System.Collections.Generic;
+using System;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
+
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -16,15 +20,48 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public GameObject mainMenu;
     public GameObject createRoomScreen;
     public GameObject joinRoomScreen;
+    public GameObject waitingScreen;
+
+    [Header("Team Info UI")]
+    public TMP_Text whiteTeamInfo;
+    public TMP_Text blackTeamInfo;
+    private DateTime dt1;
 
     private void Start()
     {
+        PhotonNetwork.AuthValues = new AuthenticationValues
+        {
+            UserId = DateTime.Now.ToString("HHmmssff") // 디바이스 고유 ID 사용
+        };
+        Debug.Log(PhotonNetwork.AuthValues.UserId);
         PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.JoinLobby(); //로비 참가(현재 존재하는 방 보기 위해서)
         roomCodeInput.characterLimit = 4; // 4자리로 제한
         roomCodeInput.contentType = TMP_InputField.ContentType.IntegerNumber; //숫자만 입력
         joinCodeInput.characterLimit = 4; // ✅ 추가: 조인 입력 필드 설정
         joinCodeInput.contentType = TMP_InputField.ContentType.IntegerNumber;
     }
+
+    //로비 참가 확인용
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("로비에 참가했습니다.");
+        Hashtable props = new Hashtable();
+        props["UserId"] = PhotonNetwork.AuthValues.UserId;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        
+        UpdateTeamInfo();
+    }
+
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
+    {
+        Debug.Log($"현재 생성된 방 수: {roomList.Count}");
+        foreach (RoomInfo room in roomList)
+        {
+            Debug.Log($"방 이름: {room.Name}, 플레이어 수: {room.PlayerCount}/{room.MaxPlayers}");
+        }
+    }
+
 
     //방 만들기 버튼 클릭
     public void OnCreateRoomFromInput()
@@ -51,7 +88,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             CreateRoom(roomCode);
             yield return new WaitUntil(() => PhotonNetwork.InRoom); // ✅ 방 생성 완료 대기
-            ShowMainMenuScreen();
+            //TODO
+            ShowWaitingScreen();
         }
         else
         {
@@ -75,21 +113,23 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.JoinRoom(roomCode); // ✅ 방 참가 시도
 
-            float timeoutDuration = 10f;
+            float timeoutDuration = 20f;
             float elapsedTime = 0f;
 
             while (!PhotonNetwork.InRoom && PhotonNetwork.IsConnected && elapsedTime < timeoutDuration)
             {
                 elapsedTime += Time.deltaTime;
+                Debug.Log($"{elapsedTime}째 기다리는중...");
                 yield return null;
             }
 
             if (PhotonNetwork.InRoom)
             {
                 Debug.Log("방 입장 성공: " + roomCode);
+                //TODO
                 // 게임 씬으로 전환 (예시)
                 // PhotonNetwork.LoadLevel("GameScene");
-                ShowMainMenuScreen();
+                ShowWaitingScreen();
             }
             else
             {
@@ -109,7 +149,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         EnableUI(joinCodeInput); // ✅ 추가: 조인 UI 전용 활성화 함수
     }
 
-    // ✅ 입력 필드 깜빡이는 효과
+    // 입력 필드 깜빡이는 효과
     private IEnumerator FlashInputField(TMP_InputField fieldName)
     {
         Image inputFieldImage = fieldName.GetComponent<Image>();
@@ -129,7 +169,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         roomOptions.MaxPlayers = 2;
         PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
-        Debug.Log($"create room num : {roomCode}");
+        Debug.Log($"생성된 방 코드: {roomCode}");
+
     }
 
     private void EnableUI(TMP_InputField fieldName)
@@ -148,11 +189,58 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         EventSystem.current.SetSelectedGameObject(null);
     }
 
+    
+    //대기 방 들어가서의 로직
+
+    private void UpdateTeamInfo()
+    {
+        whiteTeamInfo.text = "Waiting...";
+        blackTeamInfo.text = "Waiting...";
+        Debug.Log($"현재 방 상태: {PhotonNetwork.NetworkClientState}");
+        Debug.Log($"플레이어 수: {PhotonNetwork.PlayerList.Length}");
+
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            string userId = "Unknown";
+            if (player.CustomProperties.TryGetValue("UserId", out object idObj))
+            {
+                userId = (string)idObj;
+            }
+
+            if (player.IsMasterClient)
+            {
+                whiteTeamInfo.text = userId;
+            }
+            else
+            {
+                blackTeamInfo.text = userId;
+            }
+            
+            Debug.Log($"[Player {player.ActorNumber}] {userId}");
+            
+        }
+    }
+    
+    //방 입, 퇴장에 관한 이벤트
+    public override void OnJoinedRoom() => UpdateTeamInfo();
+    public override void OnPlayerEnteredRoom(Player newPlayer) => UpdateTeamInfo();
+    public override void OnPlayerLeftRoom(Player otherPlayer) => UpdateTeamInfo();
+    public override void OnMasterClientSwitched(Player newMaster) => UpdateTeamInfo();
+    
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if (changedProps.ContainsKey("UserId"))
+        {
+            UpdateTeamInfo();
+        }
+    }
+    
     // 나머지 메서드는 동일 유지
     public void OnCreateRoomButton() => ShowCreateRoomScreen();
     public void OnJoinRoomButton() => ShowJoinRoomScreen();
     public void ShowCreateRoomScreen() => SetScreen(createRoomScreen);
     public void ShowMainMenuScreen() => SetScreen(mainMenu);
+    public void ShowWaitingScreen() => SetScreen(waitingScreen);
 
     public void ShowJoinRoomScreen() => SetScreen(joinRoomScreen);
 
@@ -161,8 +249,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         mainMenu.SetActive(activeScreen == mainMenu);
         createRoomScreen.SetActive(activeScreen == createRoomScreen);
         joinRoomScreen.SetActive(activeScreen == joinRoomScreen);
+        waitingScreen.SetActive(activeScreen == waitingScreen);
     }
 
+
+    
     public override void OnConnectedToMaster() => Debug.Log("서버 연결 성공");
     public override void OnDisconnected(DisconnectCause cause) => Debug.Log($"연결 끊김: {cause}");
 }

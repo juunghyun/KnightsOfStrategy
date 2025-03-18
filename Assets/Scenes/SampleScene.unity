@@ -312,6 +312,9 @@ MonoBehaviour:
   mainMenu: {fileID: 1253518291}
   createRoomScreen: {fileID: 309505319}
   joinRoomScreen: {fileID: 1503372004}
+  waitingScreen: {fileID: 1228065347}
+  whiteTeamInfo: {fileID: 1719790938}
+  blackTeamInfo: {fileID: 1322778321}
 --- !u!4 &173575754
 Transform:
   m_ObjectHideFlags: 0
