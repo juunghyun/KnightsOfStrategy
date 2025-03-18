@@ -19,6 +19,7 @@ public class Chessboard : MonoBehaviour
     [SerializeField] private Vector3 boardCenter = Vector3.zero;
     [SerializeField] private Material hoverTileMaterial; // Hover 상태일 때 사용할 재질
     [SerializeField] private float dragOffset = 1.0f;
+    [SerializeField] private GameObject victoryScreen;
 
     [Header("Prefabs && Materials")]
     [SerializeField] private GameObject[] prefabs;
@@ -37,11 +38,13 @@ public class Chessboard : MonoBehaviour
     private Camera currentCamera;
     private Vector2Int currentHover;
     private Vector3 bounds;
+    private bool isWhiteTurn;
 
     private void Awake()
     {
+        isWhiteTurn = true; //시작시 백 턴턴
         GenerateAllTiles(tileSize, TILE_COUNT_X, TILE_COUNT_Y);
-        SpwanAllPieces();
+        SpawnAllPieces();
         PositionAllPieces();
     }
 
@@ -82,8 +85,8 @@ public class Chessboard : MonoBehaviour
             {
                 if(chessPieces[hitPosition.x, hitPosition.y]!= null)
                 {
-                    // 내 턴이야?(흑 턴인지 백 턴인지지)
-                    if(true) //TODO
+                    // 내 턴이야?(흑 턴인지 백 턴인지)
+                    if((chessPieces[hitPosition.x, hitPosition.y].team == 0 && isWhiteTurn) || (chessPieces[hitPosition.x, hitPosition.y].team == 1 && !isWhiteTurn))
                     {
                         currentlyDragging = chessPieces[hitPosition.x, hitPosition.y];
 
@@ -189,7 +192,7 @@ public class Chessboard : MonoBehaviour
     }
 
     //기물 생성성
-    private void SpwanAllPieces()
+    private void SpawnAllPieces()
     {
         chessPieces = new ChessPiece[TILE_COUNT_X, TILE_COUNT_Y];
 
@@ -274,6 +277,64 @@ public class Chessboard : MonoBehaviour
         availableMoves.Clear();
     }
     
+    //체크메이트 Checkmate
+    private void CheckMate(int team)
+    {
+        DisplayVictory(team);
+    }
+    private void DisplayVictory(int winningTeam)
+    {
+        victoryScreen.SetActive(true); //win 화면 출력력
+        victoryScreen.transform.GetChild(winningTeam).gameObject.SetActive(true); //win 화면 내 이긴 팀 문구 출력
+    }
+
+    public void OnResetButton()
+    {
+        //win UI 닫기
+        victoryScreen.transform.GetChild(0).gameObject.SetActive(false);
+        victoryScreen.transform.GetChild(1).gameObject.SetActive(false);
+        victoryScreen.SetActive(false); //win 화면 출력
+
+        //필드 리셋 Fields reset
+        currentlyDragging = null;
+        availableMoves = new List<Vector2Int>();
+        
+        //Clean up
+        for (int x = 0; x < TILE_COUNT_X; x++)
+        {
+            for (int y = 0; y < TILE_COUNT_Y; y++)
+            {
+                if(chessPieces[x,y] != null)
+                {
+                    Destroy(chessPieces[x,y].gameObject);
+                }
+
+                chessPieces[x,y] = null;
+            }
+        }
+
+        for (int i = 0; i < deadWhites.Count; i++)
+        {
+            Destroy(deadWhites[i].gameObject);
+        }
+        for (int i = 0; i < deadBlacks.Count; i++)
+        {
+            Destroy(deadBlacks[i].gameObject);
+        }
+
+        deadWhites.Clear();
+        deadBlacks.Clear();
+
+        SpawnAllPieces();
+        PositionAllPieces();
+        isWhiteTurn = true;
+    }
+
+    public void OnExitButton()
+    {
+        Application.Quit();
+    }
+
     // Operations
     private bool ContainsValidMove(ref List<Vector2Int> moves, Vector2 pos) //갈 수 있는 위치와, 갈 위치를 정했을때 동일하면 true
     {
@@ -302,6 +363,9 @@ public class Chessboard : MonoBehaviour
             
             if(ocp.team == 0)
             {
+
+                if(ocp.type == chessPieceType.King) CheckMate(1); // 게임 종료 조건, 흑팀 승(백팀을 잡았으므로)
+
                 deadWhites.Add(ocp);
                 ocp.SetScale(Vector3.one * deathSize);
                 ocp.SetPosition(new Vector3(8 * tileSize, yOffset, -1 * tileSize)
@@ -311,6 +375,8 @@ public class Chessboard : MonoBehaviour
             }
             else
             {
+                if(ocp.type == chessPieceType.King) CheckMate(0); // 게임 종료 조건, 백팀 승(흑팀을 잡았으므로)
+
                 deadBlacks.Add(ocp);
                 ocp.SetScale(Vector3.one * deathSize);
                 ocp.SetPosition(new Vector3(-1 * tileSize, yOffset, 8 * tileSize)
@@ -324,6 +390,8 @@ public class Chessboard : MonoBehaviour
         chessPieces[previousPosition.x, previousPosition.y] = null;
 
         PositionSinglePiece(x,y);
+
+        isWhiteTurn = !isWhiteTurn; //턴 바꾸기
 
         return true;
     }
