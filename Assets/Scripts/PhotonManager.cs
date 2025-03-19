@@ -35,6 +35,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+
+        PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.AuthValues = new AuthenticationValues
         {
             UserId = DateTime.Now.ToString("HHmmssff") // 디바이스 고유 ID 사용
@@ -309,6 +311,28 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(1f);
         
         // PhotonNetwork.LoadLevel("GameScene"); // 게임 씬 이름에 맞게 수정
+        if (PhotonNetwork.IsMasterClient)
+        {
+            var players = PhotonNetwork.PlayerList;
+            for (int i = 0; i < players.Length; i++)
+            {
+                if(players[i].IsMasterClient)
+                {
+                    int team = 0; //마스터가 백팀
+                    Hashtable props = new Hashtable {{"Team", team}};
+                    players[i].SetCustomProperties(props);
+                }
+                else
+                {
+                    int team = 1; //마스터 아닌사람이 흑팀
+                    Hashtable props = new Hashtable {{"Team", team}};
+                    players[i].SetCustomProperties(props);
+                }
+            }
+            PhotonNetwork.CurrentRoom.IsVisible = false;
+            PhotonNetwork.CurrentRoom.IsOpen = false;
+            PhotonNetwork.LoadLevel("GameScene");
+        }
     }
     
     // 나머지 메서드는 동일 유지

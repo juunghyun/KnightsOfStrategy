@@ -315,6 +315,9 @@ MonoBehaviour:
   waitingScreen: {fileID: 1228065347}
   whiteTeamInfo: {fileID: 1719790938}
   blackTeamInfo: {fileID: 1322778321}
+  whiteReadyButton: {fileID: 2123636582}
+  blackReadyButton: {fileID: 472020885}
+  countdownText: {fileID: 1312126433}
 --- !u!4 &173575754
 Transform:
   m_ObjectHideFlags: 0
@@ -689,7 +692,6 @@ GameObject:
   m_Component:
   - component: {fileID: 330585546}
   - component: {fileID: 330585545}
-  - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   m_Layer: 0
   m_Name: Main Camera
@@ -698,14 +700,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &330585544
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330585543}
-  m_Enabled: 1
 --- !u!20 &330585545
 Camera:
   m_ObjectHideFlags: 0
@@ -1336,7 +1330,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 173575753}
         m_TargetAssemblyTypeName: PhotonManager, Assembly-CSharp
-        m_MethodName: OnReadyButtonClick
+        m_MethodName: OnReadyButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1517,86 +1511,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 524932661}
   m_CullTransparentMesh: 1
---- !u!1001 &560552096
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_Name
-      value: ChessBoard
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_Layer
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -3.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -3.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.000000021855694
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 936458528}
-  m_SourcePrefab: {fileID: 100100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
 --- !u!1 &579732319
 GameObject:
   m_ObjectHideFlags: 0
@@ -2983,42 +2897,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 921902656}
   m_CullTransparentMesh: 1
---- !u!1 &936458527 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 100000, guid: ba44901e27656394a83c87ba14ddbdd9, type: 3}
-  m_PrefabInstance: {fileID: 560552096}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &936458528
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936458527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de969a078fccf554cb3eef1bc32e171c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tileMaterial: {fileID: 2100000, guid: 3e0acf771daf64b40b16e1435bfef0a4, type: 2}
-  tileSize: 1
-  yOffset: 0.05
-  deathSize: 0.6
-  deathSpacing: 0.53
-  boardCenter: {x: 0, y: 0, z: 0}
-  hoverTileMaterial: {fileID: 2100000, guid: 041c81966e539524a84e40b79f6dd22f, type: 2}
-  dragOffset: 1
-  victoryScreen: {fileID: 624753028}
-  prefabs:
-  - {fileID: 1867195236767680, guid: b1d95c04dd54e434aa65855a0f77d30f, type: 3}
-  - {fileID: 1211746330687442, guid: a72c2cd1520039b4084a4a33dfeccf7e, type: 3}
-  - {fileID: 1179637952412708, guid: a007978aa14da3945b0f6655f65cc278, type: 3}
-  - {fileID: 1672242659374470, guid: f005021ceced8b240983e71a3d481180, type: 3}
-  - {fileID: 1471985601831630, guid: 664a4dc6e997f5f47a9233db911328ac, type: 3}
-  - {fileID: 1810274083847610, guid: 309659d4eb727d74d91c4875a85edc00, type: 3}
-  teamMaterials:
-  - {fileID: 2100000, guid: 00912c1e55787984d8a57cef15d87a8b, type: 2}
-  - {fileID: 2100000, guid: 519bb7ad9c0b01145b66756f3c261e30, type: 2}
 --- !u!1 &967288946
 GameObject:
   m_ObjectHideFlags: 0
@@ -4586,7 +4464,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 936458528}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Chessboard, Assembly-CSharp
         m_MethodName: OnResetButton
         m_Mode: 1
@@ -5253,7 +5131,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 173575753}
         m_TargetAssemblyTypeName: PhotonManager, Assembly-CSharp
-        m_MethodName: OnReadyButtonClick
+        m_MethodName: OnReadyButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5384,7 +5262,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 936458528}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Chessboard, Assembly-CSharp
         m_MethodName: OnExitButton
         m_Mode: 1
@@ -5441,7 +5319,6 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
-  - {fileID: 560552096}
   - {fileID: 1015882513}
   - {fileID: 914353071}
   - {fileID: 173575754}
