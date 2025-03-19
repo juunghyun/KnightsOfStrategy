@@ -27,6 +27,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public TMP_Text blackTeamInfo;
     private DateTime dt1;
 
+    [Header("Ready System")]
+    public Button whiteReadyButton;
+    public Button blackReadyButton;
+    public TMP_Text countdownText;
+    private bool isReady = false;
+
     private void Start()
     {
         PhotonNetwork.AuthValues = new AuthenticationValues
@@ -119,16 +125,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             while (!PhotonNetwork.InRoom && PhotonNetwork.IsConnected && elapsedTime < timeoutDuration)
             {
                 elapsedTime += Time.deltaTime;
-                Debug.Log($"{elapsedTime}째 기다리는중...");
+                // Debug.Log($"{elapsedTime}째 기다리는중...");
                 yield return null;
             }
 
             if (PhotonNetwork.InRoom)
             {
                 Debug.Log("방 입장 성공: " + roomCode);
-                //TODO
-                // 게임 씬으로 전환 (예시)
-                // PhotonNetwork.LoadLevel("GameScene");
                 ShowWaitingScreen();
             }
             else
@@ -202,8 +205,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private void UpdateTeamInfo()
     {
+        //이름 초기화
         whiteTeamInfo.text = "Waiting...";
         blackTeamInfo.text = "Waiting...";
+
+        //레디버튼 활성화
+        whiteReadyButton.gameObject.SetActive(!PhotonNetwork.IsMasterClient);
+        blackReadyButton.gameObject.SetActive(PhotonNetwork.IsMasterClient);
+
         Debug.Log($"현재 방 상태: {PhotonNetwork.NetworkClientState}");
         Debug.Log($"플레이어 수: {PhotonNetwork.PlayerList.Length}");
 
@@ -242,12 +251,64 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer) => UpdateTeamInfo();
     public override void OnMasterClientSwitched(Player newMaster) => UpdateTeamInfo();
     
+    //레디 이벤트트
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
         if (changedProps.ContainsKey("UserId"))
         {
             UpdateTeamInfo();
         }
+        if (changedProps.ContainsKey("Ready"))
+        {
+            CheckAllPlayersReady();
+        }
+    }
+
+    //레디 이벤트
+    public void OnReadyButton()
+    {
+        isReady = true;
+        
+        Hashtable props = new Hashtable();
+        props["Ready"] = isReady; //커스텀 프로퍼티의 Ready 를 true로 만들기기
+        PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        
+    }
+
+    void CheckAllPlayersReady()
+    {
+        if (PhotonNetwork.PlayerList.Length < 2) return; // 두 명이 다 참가했는지 확인
+
+        bool allReady = true;
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (!player.CustomProperties.ContainsKey("Ready") || !(bool)player.CustomProperties["Ready"])
+            {
+                allReady = false;
+                break;
+            }
+        }
+
+        if (allReady)
+        {
+            StartCoroutine(StartGameCountdown());
+        }
+    }
+
+    System.Collections.IEnumerator StartGameCountdown()
+    {
+        countdownText.gameObject.SetActive(true);
+        
+        for (int i = 3; i > 0; i--)
+        {
+            countdownText.text = i.ToString();
+            yield return new WaitForSeconds(1f);
+        }
+        
+        countdownText.text = "Game Start!";
+        yield return new WaitForSeconds(1f);
+        
+        // PhotonNetwork.LoadLevel("GameScene"); // 게임 씬 이름에 맞게 수정
     }
     
     // 나머지 메서드는 동일 유지
