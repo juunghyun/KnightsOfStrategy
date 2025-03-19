@@ -167,10 +167,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private void CreateRoom(string roomCode)
     {
         RoomOptions roomOptions = new RoomOptions();
+        roomOptions.PublishUserId = true;
         roomOptions.MaxPlayers = 2;
-        PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
-        Debug.Log($"생성된 방 코드: {roomCode}");
-
+        bool success = PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
+        if(success)
+        {
+            Debug.Log($"생성된 방 코드: {roomCode}");
+        }
+        else
+        {
+            Debug.LogError("방 생성 실패! 이미 존재하는 코드일 수 있음"); //photon에서는 이미 존재하는 코드의 방 중복 불가능
+        }
+        
     }
 
     private void EnableUI(TMP_InputField fieldName)
@@ -201,23 +209,30 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            string userId = "Unknown";
-            if (player.CustomProperties.TryGetValue("UserId", out object idObj))
+            //white team Info, Black team Info 수정해야함
+            if (player != PhotonNetwork.LocalPlayer) //내가 아님?
             {
-                userId = (string)idObj;
+                if(player.IsMasterClient)
+                {
+                    whiteTeamInfo.text = player.UserId;
+                }
+                else
+                {
+                    blackTeamInfo.text = player.UserId;
+                }
+            }
+            else //나임?
+            {
+                if(player.IsMasterClient)
+                {
+                    whiteTeamInfo.text = player.UserId;
+                }
+                else
+                {
+                    blackTeamInfo.text = player.UserId;
+                }
             }
 
-            if (player.IsMasterClient)
-            {
-                whiteTeamInfo.text = userId;
-            }
-            else
-            {
-                blackTeamInfo.text = userId;
-            }
-            
-            Debug.Log($"[Player {player.ActorNumber}] {userId}");
-            
         }
     }
     
